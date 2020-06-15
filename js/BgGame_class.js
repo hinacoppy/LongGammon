@@ -120,7 +120,7 @@ console.log("initGameOption", this.showpipflg, this.useclockflg, this.flashflg, 
 
   beginNewGame(newmatch = false) {
 //console.log("beginNewGame");
-    const initpos = "-b-----F-C----fF----c-f-----B-";
+    const initpos = "-b-----F-D----fF----d-f-----B-";
     this.xgid.initialize(initpos, newmatch, this.matchLength);
     this.board.showBoard2(this.xgid);
     this.showPipInfo();
@@ -597,14 +597,14 @@ console.log("showGameEndPanel", mes1, mes2, mes3);
 //console.log("dragStop button", this.xgid.moveFinished() , this.flashflg);
     this.donebtn.prop("disabled", (!this.xgid.moveFinished() && this.flashflg) );
     const turn = BgUtil.cvtTurnGm2Xg(this.player);
-    if (this.xgid.get_boff(turn) == 17) { this.bearoffAllAction(); }
+    if (this.xgid.get_boff(turn) == 18) { this.bearoffAllAction(); }
   }
 
   swapChequerDraggable(player, init = false) {
     this.chequerall.removeClass("draggable");
     if (init) { return; }
     const plyr = BgUtil.cvtTurnGm2Bd(player);
-    for (let i = 0; i < 17; i++) {
+    for (let i = 0; i < 18; i++) {
       const pt = this.board.chequer[plyr][i].point;
       if (pt == 30 || pt == 31) { continue; }
       this.board.chequer[plyr][i].dom.addClass("draggable");
