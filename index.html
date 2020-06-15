@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+  <meta name="description" content="Short Gammon">
+  <meta name="author" content="(C)hinacoppy 2020">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/bgboardapp.css">
+  <link rel="stylesheet" href="css/bgBoard.css">
+  <link rel="stylesheet" href="/css/font-awesome-animation.min.css">
+  <link rel="icon" href="icon/favicon.ico">
+  <link rel="apple-touch-icon" href="icon/apple-touch-icon.png">
+  <title>LongGammon</title>
+</head>
+<body class="container">
+<section id="board" class="board boardStyle9"></section>
+
+<div id="player1" class="nav">
+<div id="score1" class="score">0</div>
+<div id="pip1" class="pip">125</div>
+<div id="clock1" class="clock">10:00</div>
+</div>
+<div id="player2" class="nav">
+<div id="score2" class="score">0</div>
+<div id="pip2" class="pip">125</div>
+<div id="clock2" class="clock">10:00</div>
+</div>
+<nav id="nav" class="nav">
+<div id="matchinfo" class="score">5</div>
+<button id="settingbtn" class="oparationbtn"><i class="fas fa-bars"></i> Settings</button>
+</nav>
+
+<section id="panelholder" style="display:none">
+<button id="rollbtn" class="oparationbtn panel"><i class="fas fa-dice"></i> Roll</button>
+<span id="doubleresign" class="panel">
+<button id="doublebtn" class="oparationbtn"><i class="fas fa-dice-d6"></i> Double</button> &emsp;
+<button id="resignbtn" class="oparationbtn"><i class="fas fa-flag" style="color:white"></i> Resign</button>
+</span>
+
+<button id="takebtn" class="oparationbtn panel"><i class="fas fa-thumbs-up"></i> Take</button>
+<button id="dropbtn" class="oparationbtn panel"><i class="fas fa-thumbs-down"></i> Pass</button>
+
+<div id="doneundo" class="panel">
+<button id="donebtn" class="oparationbtn"><i class="fas fa-check-circle"></i> Done</button> &emsp;
+<button id="undobtn" class="oparationbtn"><i class="fas fa-undo"></i> Undo</button>
+</div>
+<button id="openingroll" class="oparationbtn panel"><i class="fas fa-dice"></i> Opening Roll</button>
+
+<div id="gameend" class="panel settings">
+<p class="mes1">You WIN and the MATCH</p>
+<p class="mes2">Get <span>2</span>pt</p>
+<p class="mes3"><span>7</span> - <span>5</span> &emsp; (<span>9</span>pt)</p>
+<button id="gameendnextbtn" class="oparationbtn"><i class="fas fa-arrow-alt-circle-right"></i> Next</button>
+<button id="gameendokbtn" class="oparationbtn"><i class="fas fa-check-circle"></i> OK</button>
+</div>
+</section>
+
+<aside id="settings" class="settings" style="display:none">
+<h2>### Backgammon Board App Settings ###</h2>
+<p>
+Match length:
+<select id="matchlen" name="matchlen">
+<option value="0">0</option>
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="5" selected>5</option>
+<option value="7">7</option>
+<option value="9">9</option>
+<option value="11">11</option>
+<option value="13">13</option>
+<option value="15">15</option>
+<option value="17">17</option>
+<option value="19">19</option>
+<option value="21">21</option>
+<option value="23">23</option>
+<option value="25">25</option>
+</select>
+(0 = Unlimited)
+</p>
+<p>
+<input type="checkbox" id="showpip" name="showpip" class="switch" checked>
+<label for="showpip" class="togglelabel">Show pip</label>
+</p>
+<p>
+<input type="checkbox" id="flashdest" name="flashdest" class="switch" checked>
+<label for="flashdest" class="togglelabel">Flash movable Pt</label>
+</p>
+<p>
+<input type="checkbox" id="useclock" name="useclock" class="switch">
+<label for="useclock" class="togglelabel">Use Clock</label>
+</p>
+
+<aside class="aside">
+<textarea id="kifuxgid" cols="70" rows="5" style="display:none;"></textarea>
+<textarea id="kifumat" cols="70" rows="5" style="display:none;"></textarea>
+</aside>
+
+<br><br>
+<!--<button id="resetscorebtn" class="oparationbtn"><i class="fas fa-eraser"></i> Reset Score</button> &emsp;&emsp;&emsp;&emsp;-->
+<button id="newgamebtn" class="oparationbtn"><i class="fas fa-check"></i> New Game</button> &emsp;&emsp;&emsp;&emsp;
+<!-- <button id="convertkifubtn" class="oparationbtn"><i class="fas fa-check"></i> Convert Kifu</button> &emsp;&emsp;&emsp;&emsp; -->
+<button id="cancelbtn" class="oparationbtn"><i class="fas fa-times"></i> Cancel</button> &emsp;&emsp;&emsp;&emsp;
+<a href="help.html" target="help"><button id="helpbtn" class="oparationbtn"><i class="fas fa-question"></i> Help</button></a>
+
+</aside>
+
+
+<script src="/js/fontawesome-all.min.js" defer></script>
+<script src="/js/jquery-3.4.1.min.js"></script>
+<script src="/js/inobounce.min.js"></script>
+<script src="js/BgUtil_class.js"></script>
+<script src="js/BgXgid_class.js"></script>
+<script src="js/BgChequer_class.js"></script>
+<script src="js/BgBoard_class.js"></script>
+<script src="js/BgGame_class.js"></script>
+<script>
+if (BgUtil.isIOS()) {
+  iNoBounce.enable();
+}
+var bgGame = new BgGame();
+</script>
+<script src="/js/start-serviceWorker.js"></script>
+</body>
+</html>
