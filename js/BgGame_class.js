@@ -39,8 +39,6 @@ class BgGame {
     this.cancelbtn   = $("#cancelbtn");
     this.settingbtn  = $("#settingbtn");
     this.openrollbtn = $("#openingroll");
-//    this.resetscorebtn = $("#resetscorebtn");
-    this.convertkifubtn = $("#convertkifubtn");
     this.gameendnextbtn= $("#gameendnextbtn");
     this.gameendokbtn  = $("#gameendokbtn");
     this.diceAsBtn  = $("#dice10,#dice11,#dice20,#dice21");
@@ -68,8 +66,6 @@ class BgGame {
     this.useclockflg = $("[name=useclock]").prop("checked");
     this.flashflg    = $("[name=flashdest]").prop("checked"); //ドラッグ開始時に移動可能なポイントを光らせる
     this.matchlen    = $("#matchlen");
-    this.kifuxgid    = $("#kifuxgid");
-    this.kifumat     = $("#kifumat");
 
     //chequer
     this.chequerall = $(".chequer");
@@ -90,9 +86,7 @@ class BgGame {
     this.gameendokbtn.  on(clickEventType, (e) => { e.preventDefault(); this.gameendOkAction(); });
     this.diceAsBtn.     on(clickEventType, (e) => { e.preventDefault(); this.doneAction(); });
     this.settingbtn.    on(clickEventType, (e) => { e.preventDefault(); this.showSettingPanelAction(); });
-//    this.resetscorebtn. on(clickEventType, (e) => { e.preventDefault(); this.resetScoreAction(); });
     this.newgamebtn.    on(clickEventType, (e) => { e.preventDefault(); this.newGameAction(); });
-    this.convertkifubtn.on(clickEventType, (e) => { e.preventDefault(); this.convertKifuAction(); });
     this.cancelbtn.     on(clickEventType, (e) => { e.preventDefault(); this.cancelSettingPanelAction(); });
     this.pointTriangle. on('touchstart mousedown', (e) => { e.preventDefault(); this.pointTouchStartAction(e); });
     $(window).          on('resize',       (e) => { e.preventDefault(); this.board.redraw(); }); 
@@ -112,14 +106,9 @@ class BgGame {
     this.score = [0,0,0];
     this.scoreinfo[1].text(0);
     this.scoreinfo[2].text(0);
-    this.kifuxgid.val("");
-    this.kifumat.val("");
-
-console.log("initGameOption", this.showpipflg, this.useclockflg, this.flashflg, this.matchLength);
   }
 
   beginNewGame(newmatch = false) {
-//console.log("beginNewGame");
     const initpos = "-b-----F-D----fF----d-f-----B-";
     this.xgid.initialize(initpos, newmatch, this.matchLength);
     this.board.showBoard2(this.xgid);
@@ -127,7 +116,6 @@ console.log("initGameOption", this.showpipflg, this.useclockflg, this.flashflg, 
     this.swapChequerDraggable(true, true);
     this.hideAllPanel();
     this.showOpenRollPanel();
-console.log("beginNewGame", this.xgid.xgidstr, this.xgid.matchsc);
   }
 
   async rollAction(openroll = false) {
@@ -142,9 +130,7 @@ console.log("beginNewGame", this.xgid.xgidstr, this.xgid.matchsc);
       this.player = (dice[0] > dice[1]);
       this.xgid.turn = BgUtil.cvtTurnGm2Xg(this.player);
     }
-console.log("rollAction", openroll, this.player, this.xgid.dice, this.xgid.xgidstr);
     this.swapChequerDraggable(this.player);
-    this.addKifuXgid(this.xgid.xgidstr);
     this.pushXgidPosition();
     this.showDoneUndoPanel(this.player, openroll);
   }
@@ -157,14 +143,12 @@ console.log("rollAction", openroll, this.player, this.xgid.dice, this.xgid.xgids
       this.xgid.usabledice = true;
       this.donebtn.prop("disabled", (!this.xgid.moveFinished() && this.flashflg) );
       this.pushXgidPosition();
-console.log("undoAction", xgidstr);
       this.board.showBoard2(this.xgid);
       this.swapChequerDraggable(this.player);
     }
   }
 
   doneAction() {
-console.log("doneAction");
     if (this.donebtn.prop("disabled")) { return; }
     this.hideAllPanel();
     this.swapTurn();
@@ -173,23 +157,19 @@ console.log("doneAction");
     this.showPipInfo();
     this.board.showBoard2(this.xgid);
     this.swapChequerDraggable(true, true);
-//    this.addKifuXgid(this.xgid.xgidstr);
     this.showRollDoubleResignPanel(this.player);
   }
 
   resignAction() {
-console.log("resignAction");
     this.hideAllPanel();
     this.swapTurn();
     this.xgid.dice = "00";
     this.calcScore(this.player);
     this.board.showBoard2(this.xgid);
-    this.addKifuXgid(this.xgid.xgidstr);
     this.showGameEndPanel(this.player);
   }
 
   async doubleAction() {
-console.log("doubleAction");
     if (this.doublebtn.prop("disabled")) { return; }
     this.hideAllPanel();
     this.swapTurn();
@@ -199,23 +179,19 @@ console.log("doubleAction");
     this.swapXgTurn();
     this.board.showBoard2(this.xgid); //double offer
     await this.board.animateCube(this.animDelay); //キューブを揺すのはshowBoard()の後
-    this.addKifuXgid(this.xgid.xgidstr);
     this.showTakeDropPanel(this.player);
   }
 
   takeAction() {
-console.log("takeAction");
     this.hideAllPanel();
     this.swapTurn();
     this.swapXgTurn();
     this.xgid.dice = "00";
     this.board.showBoard2(this.xgid);
-    this.addKifuXgid(this.xgid.xgidstr);
     this.showRollDoubleResignPanel(this.player, false); //dont show resign button
   }
 
   dropAction() {
-console.log("dropAction");
     this.hideAllPanel();
     this.swapTurn();
     this.xgid.cube -= 1;
@@ -223,28 +199,22 @@ console.log("dropAction");
     this.xgid.dbloffer = false;
     this.swapXgTurn();
     this.board.showBoard2(this.xgid);
-    this.addKifuXgid(this.xgid.xgidstr);
     this.showGameEndPanel(this.player);
   }
 
   gameendNextAction() {
-console.log("gameendNextAction");
     this.hideAllPanel();
     this.showScoreInfo();
-    this.addKifuXgid("\n");
     this.beginNewGame(false);
   }
 
   gameendOkAction() {
-console.log("gameendOkAction");
     this.hideAllPanel();
     this.showScoreInfo();
   }
 
   bearoffAllAction() {
-console.log("bearoffAllAction");
     this.calcScore(this.player); // this.player is winner
-    this.addKifuXgid(this.xgid.xgidstr);
     this.showGameEndPanel(this.player);
   }
 
@@ -282,7 +252,6 @@ console.log("bearoffAllAction");
       }
     }
     const dicestr = String(d1) + String(d2);
-//console.log("randomdice", d1, d2, dicestr);
     return [d1, d2, dicestr];
   }
 
@@ -290,6 +259,7 @@ console.log("bearoffAllAction");
     this.pipinfo[1].text(this.xgid.get_pip(+1));
     this.pipinfo[2].text(this.xgid.get_pip(-1));
   }
+
   showScoreInfo() {
     this.scoreinfo[1].text(this.xgid.sc_me);
     this.scoreinfo[2].text(this.xgid.sc_yu);
@@ -305,13 +275,10 @@ console.log("bearoffAllAction");
     this.xgid.sc_me = this.score[1];
     this.xgid.sc_yu = this.score[2];
     this.matchwinflg = (this.matchLength != 0) && (this.score[w] >= this.matchLength);
-console.log("calcScore", player, this.xgid.crawford, this.score[w], this.gamescore, this.score[l], this.score,  this.matchwinflg, this.matchLength);
   }
 
   canDouble(player) {
-    const candbl = !this.xgid.crawford && (this.xgid.cubepos == 0) || (this.xgid.cubepos == this.xgid.turn);
-console.log("canDouble", candbl, this.xgid.cubepos , this.xgid.turn, player);
-    return candbl;
+    return !this.xgid.crawford && (this.xgid.cubepos == 0) || (this.xgid.cubepos == this.xgid.turn);
   }
 
   showOpenRollPanel() {
@@ -319,7 +286,6 @@ console.log("canDouble", candbl, this.xgid.cubepos , this.xgid.turn, player);
   }
 
   showTakeDropPanel(player) {
-console.log("showTakeDropPanel", player);
     if (player) {
       this.showElement(this.takebtn, 'R', player);
       this.showElement(this.dropbtn, 'L', player);
@@ -330,7 +296,6 @@ console.log("showTakeDropPanel", player);
   }
 
   showRollDoubleResignPanel(player, doubleresignpanel = true) {
-console.log("showRollDoubleResignPanel", player);
     this.doublebtn.prop("disabled", !this.canDouble(player) );
     if (player) {
       this.showElement(this.rollbtn, 'R', player);
@@ -342,10 +307,7 @@ console.log("showRollDoubleResignPanel", player);
   }
 
   showDoneUndoPanel(player, opening = false) {
-const moveFinished = this.xgid.moveFinished();
-    this.donebtn.prop("disabled", (!moveFinished && this.flashflg) );
-//    this.donebtn.prop("disabled", (!this.xgid.moveFinished() && this.flashflg) );
-console.log("showDoneUndoPanel", player, moveFinished , this.flashflg);
+    this.donebtn.prop("disabled", (!this.xgid.moveFinished() && this.flashflg) );
     if (player) {
       this.showElement(this.doneundo, 'L', player);
     } else {
@@ -361,7 +323,6 @@ console.log("showDoneUndoPanel", player, moveFinished , this.flashflg);
   }
 
   makeGameEndPanal(player) {
-//console.log("showGameEndPanel", player);
     const mes1 = "You WIN" + ((this.matchwinflg) ? " and the MATCH" : "");
     this.gameend.children('.mes1').text(mes1);
     const winlevel = ["", "SINGLE", "GAMMON", "BACK GAMMON"];
@@ -373,15 +334,12 @@ console.log("showDoneUndoPanel", player, moveFinished , this.flashflg);
     const p2 = BgUtil.cvtTurnGm2Bd(!player);
     const mes3 = this.score[p1] + " - " + this.score[p2] + ((this.matchLength == 0) ? "" : "&emsp;(" +this.matchLength + "pt)");
     this.gameend.children('.mes3').html(mes3);
-
-console.log("showGameEndPanel", mes1, mes2, mes3);
   }
 
   showGameEndPanel(player) {
     this.makeGameEndPanal(player);
     this.gameendnextbtn.toggle(!this.matchwinflg);
     this.gameendokbtn.toggle(this.matchwinflg);
-
     this.gameend.show().toggleClass('turn1', player).toggleClass('turn2', !player)
                 .css(this.calcCenterPosition("B", this.gameend));
   }
@@ -432,38 +390,17 @@ console.log("showGameEndPanel", mes1, mes2, mes3);
   }
 
   pushXgidPosition() {
-//console.log("pushXgidPosition", this.xgid.xgidstr);
    this.undoStack.push(this.xgid.xgidstr);
   }
+
   popXgidPosition() {
-    const r = this.undoStack.pop();
-//console.log("popXgidPosition", r);
-    return r;
+    return this.undoStack.pop();
   }
-
-  addKifuXgid(xgid) {
-    this.kifuxgid.append(xgid + "\n");
-//    this.kifuxgid.val( this.kifuxgid.val() + xgid + "\n"); //★FIX ME  textarea -> div
-  }
-
-/***********************************
-  player2xgturn(player) {
-    return (player) ? 1 : -1;
-  }
-  player2idx(player) {
-    return (player) ? 1 : 2;
-  }
-  player2flipclass(player) {
-    return (player) ? 'turn2' : 'turn1';
-  }
-  returnXgid(xgidstr) {
-    this.xgid = new Xgid(xgidstr);
-  }
-*********************************/
 
   swapTurn() {
     this.player = !this.player;
   }
+
   swapXgTurn() {
     this.xgid.turn = -1 * this.xgid.turn;
   }
@@ -479,8 +416,6 @@ console.log("showGameEndPanel", mes1, mes2, mes3);
 
     //ドラッグ開始時のコールバック関数
     const evfn_dragstart = ((origevt) => {
-//console.log("evfn_dragstart=", origevt);
-//this.debuglog("evfn_dragstart=", origevt.type, origevt.currentTarget.outerHTML, origevt.changedTouches[0].target.outerHTML);
       dragobj = origevt.currentTarget; //dragする要素を取得し、広域変数に格納
       if (!dragobj.classList.contains("draggable")) { return; } //draggableでないオブジェクトは無視
 
@@ -502,13 +437,11 @@ console.log("showGameEndPanel", mes1, mes2, mes3);
       document.body.addEventListener("touchmove",  evfn_drag,    {passive:false});
       document.body.addEventListener("touchleave", evfn_dragend, false);
       document.body.addEventListener("touchend",   evfn_dragend, false);
-//      dragobj.      addEventListener("touchend",   evfn_dragend, false);
 
       const ui = {position: { //dragStartAction()に渡すオブジェクトを作る
                    left: dragobj.offsetLeft,
                    top:  dragobj.offsetTop
                  }};
-//console.log("evfn_dragstart", dragobj, event, x, y, event.pageX, event.pageY, event.clientX, event.screenX, event.offsetX);
       this.dragStartAction(origevt, ui);
     });
 
@@ -522,12 +455,10 @@ console.log("showGameEndPanel", mes1, mes2, mes3);
       //マウスが動いた場所に要素を動かす
       dragobj.style.top  = event.pageY - y + "px";
       dragobj.style.left = event.pageX - x + "px";
-//console.log("evfn_drag", x, y, event.pageX, event.pageY);
     });
 
     //ドラッグ終了時のコールバック関数
     const evfn_dragend = ((origevt) => {
-//console.log("evfn_dragend", origevt.type, origevt.target);
       dragobj.classList.remove("dragging"); //drag中フラグを削除
       dragobj.style.zIndex = zidx;
 
@@ -538,13 +469,11 @@ console.log("showGameEndPanel", mes1, mes2, mes3);
       document.body.removeEventListener("touchmove",  evfn_drag,    false);
       document.body.removeEventListener("touchleave", evfn_dragend, false);
       document.body.removeEventListener("touchend",   evfn_dragend, false);
-//      dragobj.      removeEventListener("touchend",   evfn_dragend, false);
 
       const ui = {position: { //dragStopAction()に渡すオブジェクトを作る
                    left: dragobj.offsetLeft,
                    top:  dragobj.offsetTop
                  }};
-//console.log("evfn_dragend", dragobj, origevt, ui);
       this.dragStopAction(origevt, ui);
     });
 
@@ -562,7 +491,6 @@ console.log("showGameEndPanel", mes1, mes2, mes3);
     if (!this.outerDragFlag) { this.dragStartPos = ui.position; }
     this.outerDragFlag = false;
     this.flashOnMovablePoint(this.dragStartPt);
-//console.log("dragStart", this.dragStartPt, this.dragStartPos, event);
   }
 
   dragStopAction(event, ui) {
@@ -571,7 +499,6 @@ console.log("showGameEndPanel", mes1, mes2, mes3);
     const xg = this.xgid;
     const ok = xg.isMovable(this.dragStartPt, this.dragEndPt, this.flashflg);
     const hit = xg.isHitted(this.dragEndPt);
-//console.log("dragStopOK?", ok, hit, this.dragStartPt, this.dragEndPt);
 
     if (ok) {
       if (hit) {
@@ -583,18 +510,16 @@ console.log("showGameEndPanel", mes1, mes2, mes3);
         if (oppoChequer) {
           oppoChequer.dom.animate(barPt, 300, () => { this.board.showBoard2(this.xgid); });
         }
-//console.log("dragStopHIT", movestr, this.xgid.xgidstr);
       }
       const movestr = this.dragStartPt + "/" + this.dragEndPt;
       this.xgid = this.xgid.moveChequer2(movestr);
-//console.log("dragStopOK ", movestr, this.xgid.xgidstr);
       if (!hit) {
         this.board.showBoard2(this.xgid);
       }
     } else {
       this.dragObject.animate(this.dragStartPos, 300);
     }
-//console.log("dragStop button", this.xgid.moveFinished() , this.flashflg);
+    this.swapChequerDraggable(this.player);
     this.donebtn.prop("disabled", (!this.xgid.moveFinished() && this.flashflg) );
     const turn = BgUtil.cvtTurnGm2Xg(this.player);
     if (this.xgid.get_boff(turn) == 18) { this.bearoffAllAction(); }
@@ -612,36 +537,27 @@ console.log("showGameEndPanel", mes1, mes2, mes3);
   }
 
   flashOnMovablePoint(startpt) {
-//    if (!this.flashflg) { return; }
-    if (this.flashflg) {
-      let dest2 = [];
-      const destpt = this.xgid.movablePoint(this.dragStartPt, this.flashflg);
-      if (this.player) { dest2 = destpt; }
-      else {
-        for (const p of destpt) {
-          const pt = (p == 0) ? 0 : 29 - p;
-          dest2.push(pt);
-        }
+    if (!this.flashflg) { return; }
+    let dest2 = [];
+    const destpt = this.xgid.movablePoint(this.dragStartPt, this.flashflg);
+    if (this.player) { dest2 = destpt; }
+    else {
+      for (const p of destpt) {
+        const pt = (p == 0) ? 0 : 29 - p;
+        dest2.push(pt);
       }
-      this.board.flashOnMovablePoint(dest2, BgUtil.cvtTurnGm2Bd(this.player));
     }
+    this.board.flashOnMovablePoint(dest2, BgUtil.cvtTurnGm2Bd(this.player));
   }
 
   flashOffMovablePoint() {
     this.board.flashOffMovablePoint();
   }
 
-//  pointTouchEndAction(event) {
-//    this.flashOffMovablePoint();
-//  }
-
   pointTouchStartAction(origevt) {
-//console.log("pointTouchStartAction", origevt.type, origevt.currentTarget, origevt.clientX, origevt.pageX, origevt);
-//this.debuglog("pointTouchStartAction", origevt.type, origevt.currentTarget.outerHTML, origevt.clientX);
     const id = origevt.currentTarget.id;
     const pt = parseInt(id.substr(2));
     const chker = this.board.getChequerOnDragging(pt, BgUtil.cvtTurnGm2Bd(this.player));
-//console.log("pointTouchStartAction", id, pt, chker);
     const evttypeflg = (origevt.type === "mousedown")
     const event = (evttypeflg) ? origevt : origevt.changedTouches[0];
 
@@ -659,37 +575,15 @@ console.log("showGameEndPanel", mes1, mes2, mes3);
         } else {
           const touchobj = new Touch({identifier: 12345,
                                       target: chkerdom[0],
-                                      //currentTarget: chkerdom[0],
                                       clientX: event.clientX,
                                       clientY: event.clientY,
                                       pageX: event.pageX,
                                       pageY: event.pageY});
           delegateEvent = new TouchEvent("touchstart", {changedTouches:[touchobj]});
         }
-//console.log("pointTouchStartAction delegateEvent=", delegateEvent);
-//this.debuglog("pointTouchStartAction delegateEvent=", delegateEvent.type, delegateEvent.currentTarget, delegateEvent.changedTouches[0].target);
         chkerdom[0].dispatchEvent(delegateEvent);
-//console.log("pointTouchStartAction", chkerdom);
       }
     }
-  }
-
-  convertKifuAction() {
-    const xgidkifu = this.kifuxgid.val();
-    const matkifu = this.convertKifu(xgidkifu);
-    this.kifumat.val( matkifu );
-  }
-  convertKifu(xgidkifu) {
-    //★TODO
-    return "MAT KIFU\n" + xgidkifu;
-  }
-
-  debuglog(...obj) {
-    const logarea = $("#kifumat");
-    let str;
-//    obj.forEach(value => str = str + " " + value.toString());
-//    logarea.val(logarea.val() + str + "\n");
-    logarea.val(logarea.val() + obj.join(" ") + "\n");
   }
 
 } //end of class BgGame

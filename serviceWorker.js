@@ -2,7 +2,7 @@
 // (参考) https://qiita.com/kaihar4/items/c09a6d73e190ab0b9b01
 'use strict';
 
-const CACHE_NAME = "LongGammon-v1"; //v1=first release, v2=no use jquery.ui
+const CACHE_NAME = "LongGammon-v2.0"; //v1=first release, v2=remove debug console
 const ORIGIN = (location.hostname == 'localhost') ? '' : location.protocol + '//' + location.hostname;
 
 const STATIC_FILES = [
