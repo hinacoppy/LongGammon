@@ -14,6 +14,7 @@ class BgGame {
     this.board = new BgBoard("bgBoardApp", this);
     this.undoStack = [];
     this.animDelay = 800;
+    this.gameFinished = false;
 
     this.setDomNames();
     this.setEventHandler();
@@ -48,13 +49,12 @@ class BgGame {
     this.playerinfo = [undefined, $("#playerinfo1"), $("#playerinfo2")];
     this.scoreinfo  = [undefined, $("#score1"), $("#score2")];
     this.pipinfo    = [undefined, $("#pip1"), $("#pip2")];
-    this.timerinfo    = [undefined, $("#timer1"), $("#timer2")];
     this.matchinfo  = $("#matchinfo");
 
     //panel
     this.panelholder  = $("#panelholder");
     this.allpanel     = $(".panel");
-    this.doubleresign = $("#doubleresign");
+    this.rolldouble   = $("#rolldouble");
     this.doneundo     = $("#doneundo");
     this.gameend      = $("#gameend");
     this.hideAllPanel(); //font awesome が描画するのを待つ必要がある
@@ -84,7 +84,7 @@ class BgGame {
     this.openrollbtn.   on(clickEventType, (e) => { e.preventDefault(); this.rollAction(true); });
     this.gameendnextbtn.on(clickEventType, (e) => { e.preventDefault(); this.gameendNextAction(); });
     this.gameendokbtn.  on(clickEventType, (e) => { e.preventDefault(); this.gameendOkAction(); });
-    this.diceAsBtn.     on(clickEventType, (e) => { e.preventDefault(); this.doneAction(); });
+    this.diceAsBtn.     on(clickEventType, (e) => { e.preventDefault(); this.diceAsDoneAction(e); });
     this.settingbtn.    on(clickEventType, (e) => { e.preventDefault(); this.showSettingPanelAction(); });
     this.newgamebtn.    on(clickEventType, (e) => { e.preventDefault(); this.newGameAction(); });
     this.cancelbtn.     on(clickEventType, (e) => { e.preventDefault(); this.cancelSettingPanelAction(); });
@@ -116,6 +116,7 @@ class BgGame {
     this.swapChequerDraggable(true, true);
     this.hideAllPanel();
     this.showOpenRollPanel();
+    this.gameFinished = false;
   }
 
   async rollAction(openroll = false) {
@@ -150,6 +151,7 @@ class BgGame {
 
   doneAction() {
     if (this.donebtn.prop("disabled")) { return; }
+    if (this.gameFinished) { return; }
     this.hideAllPanel();
     this.swapTurn();
     this.xgid.dice = "00";
@@ -157,16 +159,19 @@ class BgGame {
     this.showPipInfo();
     this.board.showBoard2(this.xgid);
     this.swapChequerDraggable(true, true);
-    this.showRollDoubleResignPanel(this.player);
+    this.showRollDoublePanel(this.player);
   }
 
   resignAction() {
+    this.cancelSettingPanelAction();
+    if (this.gameFinished) { return; }
     this.hideAllPanel();
     this.swapTurn();
     this.xgid.dice = "00";
     this.calcScore(this.player);
     this.board.showBoard2(this.xgid);
     this.showGameEndPanel(this.player);
+    this.gameFinished = true;
   }
 
   async doubleAction() {
@@ -188,7 +193,7 @@ class BgGame {
     this.swapXgTurn();
     this.xgid.dice = "00";
     this.board.showBoard2(this.xgid);
-    this.showRollDoubleResignPanel(this.player, false); //dont show resign button
+    this.showRollDoublePanel(this.player);
   }
 
   dropAction() {
@@ -200,6 +205,7 @@ class BgGame {
     this.swapXgTurn();
     this.board.showBoard2(this.xgid);
     this.showGameEndPanel(this.player);
+    this.gameFinished = true;
   }
 
   gameendNextAction() {
@@ -214,8 +220,15 @@ class BgGame {
   }
 
   bearoffAllAction() {
+    this.hideAllPanel();
     this.calcScore(this.player); // this.player is winner
     this.showGameEndPanel(this.player);
+    this.gameFinished = true;
+  }
+
+  diceAsDoneAction(e) {
+    if (BgUtil.cvtTurnGm2Bd(this.player) != e.currentTarget.id.substr(4,1)) { return; } //ex. id="dice10"
+    this.doneAction();
   }
 
   showSettingPanelAction() {
@@ -295,14 +308,12 @@ class BgGame {
     }
   }
 
-  showRollDoubleResignPanel(player, doubleresignpanel = true) {
+  showRollDoublePanel(player) {
     this.doublebtn.prop("disabled", !this.canDouble(player) );
     if (player) {
-      this.showElement(this.rollbtn, 'R', player);
-      if (doubleresignpanel) { this.showElement(this.doubleresign, 'L', player); }
+      this.showElement(this.rolldouble, 'R', player);
     } else {
-      this.showElement(this.rollbtn, 'L', player);
-      if (doubleresignpanel) { this.showElement(this.doubleresign, 'R', player); }
+      this.showElement(this.rolldouble, 'L', player);
     }
   }
 
