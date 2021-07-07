@@ -14,7 +14,8 @@ class BgGame {
     this.board = new BgBoard("bgBoardApp", this);
     this.undoStack = [];
     this.animDelay = 800;
-    this.gameFinished = false;
+    this.gameFinished = true;
+    this.settingVars = {}; //設定内容を保持するオブジェクト
 
     this.setDomNames();
     this.setEventHandler();
@@ -116,7 +117,6 @@ class BgGame {
     this.swapChequerDraggable(true, true);
     this.hideAllPanel();
     this.showOpenRollPanel();
-    this.gameFinished = false;
   }
 
   async rollAction(openroll = false) {
@@ -130,6 +130,7 @@ class BgGame {
     if (openroll) {
       this.player = (dice[0] > dice[1]);
       this.xgid.turn = BgUtil.cvtTurnGm2Xg(this.player);
+      this.gameFinished = false;
     }
     this.swapChequerDraggable(this.player);
     this.pushXgidPosition();
@@ -233,12 +234,13 @@ class BgGame {
 
   showSettingPanelAction() {
     if (this.settingbtn.prop("disabled")) { return; }
-    this.settings.css(this.calcCenterPosition("S", this.settings)).slideToggle("normal"); //画面表示
+    this.settings.css(this.calcCenterPosition("S", this.settings));
+    this.settings.slideToggle("normal", () => this.saveSettingVars()); //画面表示、設定情報を退避しておく
     this.settingbtn.prop("disabled", true);
   }
 
   cancelSettingPanelAction() {
-    this.settings.slideToggle("normal"); //画面を消す
+    this.settings.slideToggle("normal", () => this.loadSettingVars()); //画面を消す、設定情報を戻す
     this.settingbtn.prop("disabled", false);
   }
 
@@ -595,6 +597,18 @@ class BgGame {
         chkerdom[0].dispatchEvent(delegateEvent);
       }
     }
+  }
+
+  saveSettingVars() {
+    this.settingVars.matchlen  = $("#matchlen").val();
+    this.settingVars.showpip   = $("#showpip").prop("checked");
+    this.settingVars.flashdest = $("#flashdest").prop("checked");
+  }
+
+  loadSettingVars() {
+    $("#matchlen") .val(this.settingVars.matchlen);
+    $("#showpip")  .prop("checked", this.settingVars.showpip);
+    $("#flashdest").prop("checked", this.settingVars.flashdest);
   }
 
 } //end of class BgGame
