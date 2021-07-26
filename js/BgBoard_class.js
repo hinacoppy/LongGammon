@@ -233,11 +233,15 @@ class BgBoard {
     }
     this.showPosition(xg);
     this.showDiceAll(xg.get_turn(), xg.get_dice(1), xg.get_dice(2));
-    this.showCube(xg.get_cubepos(),xg.get_cube(),xg.get_dbloffer(),xg.get_crawford());
+    this.showCube(xg);
     if (!this.boardAppFlag) { this.showLabels(xg.get_turn()); }
   }
 
-  showCube(pos, val, offer, crawford){
+  showCube(xg){
+    const offer = xg.get_dbloffer();
+    const pos = (!offer) ? xg.get_cubepos() : -1 * xg.get_turn();
+    const val = (!offer) ? xg.get_cube() : xg.get_cube() + 1;
+    const crawford = xg.get_crawford();
     const cubepos = BgUtil.cvtTurnXg2Bd(pos);
     const cubeval = BgUtil.calcCubeDisp(val, crawford);
     const cubePosClass = ["cubepos0", "cubepos1", "cubepos2"];

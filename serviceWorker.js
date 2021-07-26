@@ -2,7 +2,7 @@
 // (参考) https://qiita.com/kaihar4/items/c09a6d73e190ab0b9b01
 'use strict';
 
-const CACHE_NAME = "LongGammon-v3.0"; //v1=first release, v2=remove debug code, v3=change layout
+const CACHE_NAME = "LongGammon-v20210726";
 const ORIGIN = (location.hostname == 'localhost') ? '' : location.protocol + '//' + location.hostname;
 
 const STATIC_FILES = [
@@ -18,7 +18,7 @@ const STATIC_FILES = [
   ORIGIN + '/LongGammon/css/bgBoard.css',
   ORIGIN + '/css/font-awesome-animation.min.css',
   ORIGIN + '/js/fontawesome-all.min.js',
-  ORIGIN + '/js/jquery-3.4.1.min.js',
+  ORIGIN + '/js/jquery-3.6.0.min.js',
   ORIGIN + '/js/inobounce.min.js',
   ORIGIN + '/LongGammon/js/BgBoard_class.js',
   ORIGIN + '/LongGammon/js/BgChequer_class.js',

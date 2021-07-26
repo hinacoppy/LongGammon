@@ -33,7 +33,7 @@ class Xgid {
     this._parse_xgid(this._xgid); // XGIDを解析
     this._parse_position(this._position); // ボード状態を解析
     this._calc_score(); // ゲームスコアを計算
-    this.zorome = (this.get_dice(1) == this.get_dice(2));
+    this.zorome = (this._dice != "00" && this.get_dice(1) == this.get_dice(2));
     this._usable_dice = this._setUsableDice(); //ムーブに使えるダイスリスト
     this._turnpos = ((p) => (this._turn == 1) ? p : 29 - p);
     this._topt = ((f, d) => (f - d < 0) ? 0 : (f - d));
@@ -45,8 +45,6 @@ class Xgid {
   _parse_xgid(xgidstr) {
     const xgidstr2 = xgidstr.substr("XGID=".length);
     const s = xgidstr2.split(":");
-
-    if (s[4] == "D") { s[4] = "00"; this._dbloffer = true; }
 
     this._position= s[0];
     this._cube    = Number(s[1]);
@@ -64,14 +62,19 @@ class Xgid {
   }
 
   _set_dice(dicestr) {
+    this._dbloffer = false;
+    if (dicestr == "D") {
+      dicestr = "00";
+      this._dbloffer = true;
+    }
+
     this._dice = dicestr;
     // dice_odrはダイスを昇順にして保持する
     const dice1 = dicestr.substr(0,1);
     const dice2 = dicestr.substr(1,1);
     this._dice_odr = (dice1 < dice2) ? dice1 + dice2 : dice2 + dice1;
-    this._dice_ary = [0, parseInt(dice1), parseInt(dice2)];
-    this._dbloffer = false;
-    this.zorome = (dice1 == dice2);
+    this._dice_ary = [0, Number(dice1), Number(dice2)];
+    this.zorome = (dicestr != "00" && dice1 == dice2);
   }
 
   //ポジション情報をパースし状態をローカル変数に格納
@@ -92,7 +95,7 @@ class Xgid {
         this._ptcol[i] = -1;
         this._boff[1] -= this._ptno[i];
         if (i< 8) { this._bgarea[1] += this._ptno[i]; }
-        if (i<21) { this._gmarea[1] += this._ptno[i]; }
+        if (i<22) { this._gmarea[1] += this._ptno[i]; }
         this._pip[1] += this._ptno[i] * (29 - i); // ピップ数を計算
       } else if (asc >= "A".charCodeAt(0) && asc <= "Z".charCodeAt(0)) {
         this._ptno[i] = asc - "A".charCodeAt(0) + 1;
@@ -513,6 +516,20 @@ class Xgid {
     this.dice     = "00";
     this.jb       = 0;
     this.maxcube  = 0;
+  }
+
+  isCloseout(turn) {
+    const bar = (turn == 1) ? 0 : 29;
+    if (this.get_ptno(bar) == 0) { return false; } //オンザバーでなければfalse
+
+    const offset = (turn == 1) ? 1 : 22;
+    for (let p = 0; p < 7; p++) {
+      const q = p + offset;
+      if (!(this.get_ptno(q) >= 2 && this.get_ptcol(q) == turn)) {
+        return false; //インナーボードに隙間があればfalse
+      }
+    }
+    return true; //クローズアウトされていて、バーにコマがあればtrue
   }
 
 } //class Xgid

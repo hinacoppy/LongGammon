@@ -41,6 +41,7 @@ class BgGame {
     this.cancelbtn   = $("#cancelbtn");
     this.settingbtn  = $("#settingbtn");
     this.openrollbtn = $("#openingroll");
+    this.passbtn     = $("#passbtn");
     this.gameendnextbtn= $("#gameendnextbtn");
     this.gameendokbtn  = $("#gameendokbtn");
     this.diceAsBtn  = $("#dice10,#dice11,#dice20,#dice21");
@@ -83,6 +84,7 @@ class BgGame {
     this.donebtn.       on(clickEventType, (e) => { e.preventDefault(); this.doneAction(); });
     this.undobtn.       on(clickEventType, (e) => { e.preventDefault(); this.undoAction(); });
     this.openrollbtn.   on(clickEventType, (e) => { e.preventDefault(); this.rollAction(true); });
+    this.passbtn.       on(clickEventType, (e) => { e.preventDefault(); this.passAction(); });
     this.gameendnextbtn.on(clickEventType, (e) => { e.preventDefault(); this.gameendNextAction(); });
     this.gameendokbtn.  on(clickEventType, (e) => { e.preventDefault(); this.gameendOkAction(); });
     this.diceAsBtn.     on(clickEventType, (e) => { e.preventDefault(); this.diceAsDoneAction(e); });
@@ -139,15 +141,14 @@ class BgGame {
 
   undoAction() {
     //ムーブ前のボードを再表示
-    if (this.undoStack.length > 0) {
-      const xgidstr = this.popXgidPosition();
-      this.xgid = new Xgid(xgidstr);
-      this.xgid.usabledice = true;
-      this.donebtn.prop("disabled", (!this.xgid.moveFinished() && this.flashflg) );
-      this.pushXgidPosition();
-      this.board.showBoard2(this.xgid);
-      this.swapChequerDraggable(this.player);
-    }
+    if (this.undoStack.length == 0) { return; }
+    const xgidstr = this.popXgidPosition();
+    this.xgid = new Xgid(xgidstr);
+    this.xgid.usabledice = true;
+    this.donebtn.prop("disabled", (!this.xgid.moveFinished() && this.flashflg) );
+    this.pushXgidPosition();
+    this.board.showBoard2(this.xgid);
+    this.swapChequerDraggable(this.player);
   }
 
   doneAction() {
@@ -156,7 +157,7 @@ class BgGame {
     this.hideAllPanel();
     this.swapTurn();
     this.xgid.dice = "00";
-    this.xgid.turn = BgUtil.cvtTurnGm2Xg(this.player);
+    this.swapXgTurn();
     this.showPipInfo();
     this.board.showBoard2(this.xgid);
     this.swapChequerDraggable(true, true);
@@ -180,30 +181,28 @@ class BgGame {
     this.hideAllPanel();
     this.swapTurn();
     this.xgid.dbloffer = true;
-    this.xgid.cube += 1;
-    this.xgid.cubepos = BgUtil.getXgOppo(this.xgid.turn);
-    this.swapXgTurn();
     this.board.showBoard2(this.xgid); //double offer
     await this.board.animateCube(this.animDelay); //キューブを揺すのはshowBoard()の後
+    this.swapXgTurn(); //XGのturnを変えるのは棋譜用XGID出力後
     this.showTakeDropPanel(this.player);
   }
 
   takeAction() {
     this.hideAllPanel();
     this.swapTurn();
-    this.swapXgTurn();
     this.xgid.dice = "00";
+    this.xgid.cube += 1;
+    this.xgid.cubepos = this.xgid.turn;
     this.board.showBoard2(this.xgid);
+    this.swapXgTurn(); //XGのturnを変えるのは棋譜用XGID出力後
     this.showRollDoublePanel(this.player);
   }
 
   dropAction() {
     this.hideAllPanel();
     this.swapTurn();
-    this.xgid.cube -= 1;
     this.calcScore(this.player); //dblofferフラグをリセットする前に計算する必要あり
     this.xgid.dbloffer = false;
-    this.swapXgTurn();
     this.board.showBoard2(this.xgid);
     this.showGameEndPanel(this.player);
     this.gameFinished = true;
@@ -255,6 +254,11 @@ class BgGame {
     this.score = [0,0,0];
     this.scoreinfo[1].text(0);
     this.scoreinfo[2].text(0);
+  }
+
+  passAction() {
+    this.xgid.dice = "66";
+    this.doneAction();
   }
 
   randomdice(openroll = false) {
@@ -312,6 +316,9 @@ class BgGame {
 
   showRollDoublePanel(player) {
     this.doublebtn.prop("disabled", !this.canDouble(player) );
+    const closeout = this.isCloseout(player);
+    this.rollbtn.toggle(!closeout); //rollボタンかpassボタンのどちらかを表示
+    this.passbtn.toggle( closeout);
     if (player) {
       this.showElement(this.rolldouble, 'R', player);
     } else {
@@ -416,6 +423,11 @@ class BgGame {
 
   swapXgTurn() {
     this.xgid.turn = -1 * this.xgid.turn;
+  }
+
+  isCloseout(player) {
+    const xgturn = BgUtil.cvtTurnGm2Xg(!player); //クローズアウトを確認するのは相手側
+    return this.xgid.isCloseout(xgturn);
   }
 
   setChequerDraggable() {
