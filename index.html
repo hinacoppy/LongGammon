@@ -60,17 +60,20 @@
 <p>
 Match length:
 <select id="matchlen" name="matchlen">
-<option value="0">0</option>
+<option value="0">$</option>
 <option value="1">1</option>
 <option value="2">2</option>
 <option value="3">3</option>
 <option value="5" selected>5</option>
 </select>
-(0 = Unlimited)
+($ = Unlimited)
 </p>
 <p>
 <input type="checkbox" id="showpip" name="showpip" class="switch" checked>
 <label for="showpip" class="togglelabel">Show pip</label>
+&emsp;&emsp;
+<input type="checkbox" id="jacoby" name="jacoby" class="switch" value="jacoby" checked>
+<label for="jacoby" class="togglelabel">Jacoby Rule <span style="font-size:smaller;">(unlimited only)</span></label>
 </p>
 <p>
 <input type="checkbox" id="flashdest" name="flashdest" class="switch" checked>

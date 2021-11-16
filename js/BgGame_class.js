@@ -23,6 +23,7 @@ class BgGame {
     this.showpipflg = true;
     this.useclockflg = false;
     this.flashflg = true;
+    this.jacobyflg = true;
     this.outerDragFlag = false; //駒でない部分をタップしてドラッグを始めたら true
     this.initGameOption();
     this.beginNewGame(true); //スコアをリセットして新規ゲームを始める
@@ -67,6 +68,7 @@ class BgGame {
     this.showpipflg  = $("[name=showpip]").prop("checked");
     this.useclockflg = $("[name=useclock]").prop("checked");
     this.flashflg    = $("[name=flashdest]").prop("checked"); //ドラッグ開始時に移動可能なポイントを光らせる
+    this.jacobyflg   = $("[name=jacoby]").prop("checked");
     this.matchlen    = $("#matchlen");
 
     //chequer
@@ -99,6 +101,7 @@ class BgGame {
     this.useclockflg = $("[name=useclock]") .prop("checked");
     this.showpipflg  = $("[name=showpip]")  .prop("checked");
     this.flashflg    = $("[name=flashdest]").prop("checked");
+    this.jacobyflg   = $("[name=jacoby]")   .prop("checked");
 
     $(".clock").toggle(this.useclockflg);
     $(".pip").toggle(this.showpipflg && !this.useclockflg); //クロックモードのときはピップ表示しない
@@ -285,7 +288,11 @@ class BgGame {
   }
 
   calcScore(player) {
-    this.gamescore = this.xgid.get_gamesc( BgUtil.cvtTurnGm2Xg(player) );
+    let [cubeprice, gammonprice] = this.xgid.get_gamesc( BgUtil.cvtTurnGm2Xg(player) );
+    if (this.jacobyflg && this.matchLength == 0 && cubeprice == 1) {
+      gammonprice = 1;
+    }
+    this.gamescore = [cubeprice, gammonprice];
     const w = BgUtil.cvtTurnGm2Bd( player);
     const l = BgUtil.cvtTurnGm2Bd(!player);
     const scr = this.gamescore[0] * this.gamescore[1];
